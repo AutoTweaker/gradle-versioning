@@ -15,8 +15,8 @@ kotlin {
 gradlePlugin {
 	plugins {
 		create("versioning") {
-			id = "io.github.autotweaker.versioning"
-			implementationClass = "io.github.autotweaker.gradle.plugin.versioning.VersioningPlugin"
+			id = "io.github.autotweaker.plugin.versioning"
+			implementationClass = "io.github.autotweaker.plugin.versioning.VersioningPlugin"
 			displayName = "AutoTweaker Versioning"
 			description = "Computes build versions from git tags and injects them into every project"
 		}
@@ -29,8 +29,8 @@ publishing {
 			name = "GitHubPackages"
 			url = uri("https://maven.pkg.github.com/AutoTweaker/gradle-versioning")
 			credentials {
-				username = System.getenv("GITHUB_ACTOR").orEmpty()
-				password = System.getenv("GITHUB_TOKEN").orEmpty()
+				username = providers.gradleProperty("gpr.user").getOrElse("")
+				password = providers.gradleProperty("gpr.key").getOrElse("")
 			}
 		}
 	}

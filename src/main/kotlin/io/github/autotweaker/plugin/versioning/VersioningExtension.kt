@@ -1,4 +1,4 @@
-package io.github.autotweaker.gradle.plugin.versioning
+package io.github.autotweaker.plugin.versioning
 
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property

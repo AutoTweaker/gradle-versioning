@@ -1,4 +1,4 @@
-package io.github.autotweaker.gradle.plugin.versioning
+package io.github.autotweaker.plugin.versioning
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -52,6 +52,8 @@ class VersioningPlugin : Plugin<Settings> {
 				val timestamp = System.currentTimeMillis() / 1000
 				"${baseVersion.replace(Regex("-[a-zA-Z].*"), "")}-dev+$timestamp.$gitHash"
 			}
+			
+			VersionMode.RAW -> baseVersion
 		}
 	}
 	
