@@ -13,7 +13,7 @@ nmcpSettings {
 	centralPortal {
 		username = providers.gradleProperty("centralPortalUsername").getOrElse("")
 		password = providers.gradleProperty("centralPortalPassword").getOrElse("")
-		publishingType = "AUTOMATIC"
+		publishingType = "USER_MANAGED"
 	}
 }
 
