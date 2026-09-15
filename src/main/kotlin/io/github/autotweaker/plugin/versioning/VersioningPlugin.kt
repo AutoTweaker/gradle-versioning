@@ -12,6 +12,7 @@ import org.gradle.language.jvm.tasks.ProcessResources
 import java.io.File
 import java.util.*
 
+@Suppress("unused")
 class VersioningPlugin : Plugin<Settings> {
 	@Suppress("UnstableApiUsage")
 	override fun apply(settings: Settings) {
@@ -23,11 +24,9 @@ class VersioningPlugin : Plugin<Settings> {
 		val providers = settings.providers
 		val settingsDirectory = settings.layout.settingsDirectory
 		val properties by lazy { readProperties(extension.propertiesFile.get().asFile) }
-		val resolvedGroup by lazy { properties.getProperty("group") }
 		val resolvedVersion by lazy { computeVersion(properties, extension, providers, settingsDirectory) }
 		
 		settings.gradle.lifecycle.beforeProject { project ->
-			project.group = resolvedGroup
 			project.version = resolvedVersion
 			if (extension.generateResource.get()) {
 				project.registerVersionResource(extension.resourcePath.get(), resolvedVersion)
@@ -46,11 +45,11 @@ class VersioningPlugin : Plugin<Settings> {
 			spec.parameters.workingDirectory.set(settingsDirectory)
 		}.get()
 		return when (extension.versionMode.get()) {
-			VersionMode.RELEASE -> "$baseVersion+$gitHash"
+			VersionMode.RELEASE -> "${baseVersion.substringBefore('+')}+$gitHash"
 			
 			VersionMode.DEV -> {
-				val timestamp = System.currentTimeMillis() / 1000
-				"${baseVersion.replace(Regex("-[a-zA-Z].*"), "")}-dev+$timestamp.$gitHash"
+				val unixTime = System.currentTimeMillis() / 1000
+				"${baseVersion.substringBefore('-').substringBefore('+')}-dev+$unixTime.$gitHash"
 			}
 			
 			VersionMode.RAW -> baseVersion
