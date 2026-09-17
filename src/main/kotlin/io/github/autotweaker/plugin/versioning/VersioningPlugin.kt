@@ -20,13 +20,14 @@ class VersioningPlugin : Plugin<Settings> {
 			?: error("Missing version property, define it in gradle.properties")
 		val settingsDirectory = settings.layout.settingsDirectory
 		val resolvedVersion by lazy { computeVersion(baseVersion, extension, providers, settingsDirectory) }
-
+		
 		settings.gradle.lifecycle.beforeProject { project ->
 			project.version = resolvedVersion
 			project.registerVersionManifest(resolvedVersion)
+			project.registerVersionFile(resolvedVersion)
 		}
 	}
-
+	
 	private fun computeVersion(
 		baseVersion: String,
 		extension: VersioningExtension,
@@ -51,6 +52,22 @@ class VersioningPlugin : Plugin<Settings> {
 	private fun Project.registerVersionManifest(versionText: String) {
 		tasks.withType(Jar::class.java).configureEach { jar ->
 			jar.manifest.attributes["Implementation-Version"] = versionText
+		}
+	}
+	
+	private fun Project.registerVersionFile(versionText: String) {
+		val relativePath = "generated/versioning/version.txt"
+		val target = layout.buildDirectory.file(relativePath)
+		tasks.register("exportVersion") { task ->
+			task.description = "Exports the resolved version to build/$relativePath"
+			task.inputs.property("version", versionText)
+			task.outputs.file(target)
+			task.doLast {
+				target.get().asFile.apply {
+					parentFile.mkdirs()
+					writeText("$versionText\n")
+				}
+			}
 		}
 	}
 }

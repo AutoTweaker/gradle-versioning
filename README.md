@@ -39,6 +39,7 @@ versioning {
 
 - 构建期：`project.version` 将被设置为计算后的版本号，在根项目或任意子项目的 `build.gradle.kts` 中直接使用 `project.version` 访问。
 - 运行期：可读取 Manifest 属性 `Implementation-Version`，值为计算出的版本号。
+- 外部脚本：调用根项目或任意子项目的 `exportVersion` 任务，会将版本号写入对应项目的 `build/generated/versioning/version.txt`，内容形如 `0.2.0-alpha.7+5d41fd9a\n`。
 
 `VersionMode` 是一个枚举，以下是所有这三种枚举项的行为：
 
@@ -66,4 +67,11 @@ versioning {
 ```kotlin
 // 在类或伴生对象内
 val version: String = javaClass.getPackage().implementationVersion ?: error("Missing Implementation-Version")
+```
+
+在 CI 中提取版本号：
+
+```shell
+./gradlew :exportVersion
+APP_VERSION="$(cat build/generated/versioning/version.txt)"
 ```
