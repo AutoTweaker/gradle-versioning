@@ -6,6 +6,5 @@ import org.gradle.api.provider.Property
 abstract class VersioningExtension {
 	abstract val propertiesFile: RegularFileProperty
 	abstract val versionMode: Property<VersionMode>
-	abstract val resourcePath: Property<String>
 	abstract val generateResource: Property<Boolean>
 }

@@ -8,7 +8,7 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
-import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.api.tasks.bundling.Jar
 import java.io.File
 import java.util.*
 
@@ -18,18 +18,17 @@ class VersioningPlugin : Plugin<Settings> {
 	override fun apply(settings: Settings) {
 		val extension = settings.extensions.create("versioning", VersioningExtension::class.java).apply {
 			propertiesFile.convention(settings.layout.settingsDirectory.file("gradle.properties"))
-			resourcePath.convention("version.properties")
 			generateResource.convention(true)
 		}
 		val providers = settings.providers
 		val settingsDirectory = settings.layout.settingsDirectory
 		val properties by lazy { readProperties(extension.propertiesFile.get().asFile) }
 		val resolvedVersion by lazy { computeVersion(properties, extension, providers, settingsDirectory) }
-		
+
 		settings.gradle.lifecycle.beforeProject { project ->
 			project.version = resolvedVersion
 			if (extension.generateResource.get()) {
-				project.registerVersionResource(extension.resourcePath.get(), resolvedVersion)
+				project.registerVersionManifest(resolvedVersion)
 			}
 		}
 	}
@@ -56,25 +55,9 @@ class VersioningPlugin : Plugin<Settings> {
 		}
 	}
 	
-	private fun Project.registerVersionResource(resourcePath: String, versionText: String) {
-		val outputDir = layout.buildDirectory.dir("generated/versioning/resources")
-		val generateTask = tasks.register("generateVersionProperties") { task ->
-			task.description = "生成 $resourcePath，内含本次构建的版本号"
-			val target = outputDir.map { it.file(resourcePath) }
-			task.inputs.property("version", versionText)
-			task.outputs.file(target)
-			task.doLast {
-				target.get().asFile.apply {
-					parentFile.mkdirs()
-					writeText("version=$versionText")
-				}
-			}
-		}
-		tasks.withType(ProcessResources::class.java).configureEach { processResources ->
-			processResources.dependsOn(generateTask)
-			processResources.from(outputDir) { spec ->
-				spec.include(resourcePath)
-			}
+	private fun Project.registerVersionManifest(versionText: String) {
+		tasks.withType(Jar::class.java).configureEach { jar ->
+			jar.manifest.attributes["Implementation-Version"] = versionText
 		}
 	}
 	
