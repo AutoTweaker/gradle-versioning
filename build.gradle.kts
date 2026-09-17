@@ -20,7 +20,7 @@ gradlePlugin {
 			id = "io.github.autotweaker.plugin.versioning"
 			implementationClass = "io.github.autotweaker.plugin.versioning.VersioningPlugin"
 			displayName = "AutoTweaker Versioning"
-			description = "Computes build versions from git tags and injects them into every project"
+			description = "A Gradle plugin that appends build metadata to the project version and packages the `Implementation-Version` manifest attribute into jars for runtime resolution"
 		}
 	}
 }
@@ -42,7 +42,7 @@ publishing {
 		}
 		pom {
 			name.set("AutoTweaker Versioning")
-			description.set("A Gradle settings plugin for Git-tag-driven versioning: injects the version into all projects and generates a version.properties resource")
+			description.set("A Gradle plugin that appends build metadata to the project version and packages the `Implementation-Version` manifest attribute into jars for runtime resolution")
 			url.set("https://github.com/AutoTweaker/gradle-versioning")
 			licenses {
 				license {
