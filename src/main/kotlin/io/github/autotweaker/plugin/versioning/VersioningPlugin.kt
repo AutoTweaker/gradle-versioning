@@ -9,41 +9,34 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.bundling.Jar
-import java.io.File
-import java.util.*
 
 @Suppress("unused")
 class VersioningPlugin : Plugin<Settings> {
 	@Suppress("UnstableApiUsage")
 	override fun apply(settings: Settings) {
-		val extension = settings.extensions.create("versioning", VersioningExtension::class.java).apply {
-			propertiesFile.convention(settings.layout.settingsDirectory.file("gradle.properties"))
-			generateResource.convention(true)
-		}
+		val extension = settings.extensions.create("versioning", VersioningExtension::class.java)
 		val providers = settings.providers
+		val baseVersion = providers.gradleProperty("version").orNull
+			?: error("Missing version property, define it in gradle.properties")
 		val settingsDirectory = settings.layout.settingsDirectory
-		val properties by lazy { readProperties(extension.propertiesFile.get().asFile) }
-		val resolvedVersion by lazy { computeVersion(properties, extension, providers, settingsDirectory) }
+		val resolvedVersion by lazy { computeVersion(baseVersion, extension, providers, settingsDirectory) }
 
 		settings.gradle.lifecycle.beforeProject { project ->
 			project.version = resolvedVersion
-			if (extension.generateResource.get()) {
-				project.registerVersionManifest(resolvedVersion)
-			}
+			project.registerVersionManifest(resolvedVersion)
 		}
 	}
-	
+
 	private fun computeVersion(
-		properties: Properties,
+		baseVersion: String,
 		extension: VersioningExtension,
 		providers: ProviderFactory,
 		settingsDirectory: Directory,
 	): String {
-		val baseVersion = properties.getProperty("version")
 		val gitHash = providers.of(GitHashProvider::class.java) { spec ->
 			spec.parameters.workingDirectory.set(settingsDirectory)
 		}.get()
-		return when (extension.versionMode.get()) {
+		return when (extension.mode.get()) {
 			VersionMode.RELEASE -> "${baseVersion.substringBefore('+')}+$gitHash"
 			
 			VersionMode.DEV -> {
@@ -60,9 +53,6 @@ class VersioningPlugin : Plugin<Settings> {
 			jar.manifest.attributes["Implementation-Version"] = versionText
 		}
 	}
-	
-	private fun readProperties(file: File): Properties =
-		Properties().apply { file.inputStream().use { load(it) } }
 }
 
 interface GitHashParameters : ValueSourceParameters {
