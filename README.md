@@ -42,7 +42,7 @@ versioning {
 - 运行期：可读取 Manifest 属性 `Implementation-Version`，值为计算出的版本号。
 - 外部脚本：调用根项目或任意子项目的 `exportVersion` 任务，会将版本号写入对应项目的 `build/generated/versioning/version.txt`，内容形如 `0.2.0-alpha.7+5d41fd9a\n`。
 
-`VersionMode` 是一个枚举，以下是所有这三种枚举项的行为：
+`VersionMode` 是一个枚举，以下是所有三种枚举项的行为：
 
 下述 `原始版本号` 指代 gradle 属性 `version` 的值。
 
