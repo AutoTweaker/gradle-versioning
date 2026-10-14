@@ -2,6 +2,7 @@
 
 这是一个 Gradle 插件，用于为项目版本号拼接构建元数据，并将 Manifest 属性 `Implementation-Version` 打包进 jar 供运行时解析。
 
+> [!NOTE]
 > 注意，自 2.0.1 版本起，本插件不再发布到 GitHub Packages，请直接通过 Maven Central 访问插件。
 
 ## 使用方式
